@@ -1,0 +1,28 @@
+title: Mini CRM Docs
+description: >-
+  Full-featured, modular CRM built with Laravel 12, Inertia.js, React 19,
+  and Tailwind CSS. Free and open source under the MIT License.
+
+baseurl: ""
+url: ""
+
+remote_theme: just-the-docs/just-the-docs
+
+color_scheme: light
+search_enabled: true
+search_tokenizer_separator: /[\s/]+/
+
+heading_anchors: true
+
+aux_links:
+  "GitHub":
+    - "https://github.com/xgenious/mini-crm"
+
+footer_content: >-
+  Built by <a href="https://xgenious.com">Xgenious</a> &mdash;
+  MIT License &mdash; Free &amp; Open Source
+
+back_to_top: true
+back_to_top_text: "Back to top"
+
+gh_edit_link: false

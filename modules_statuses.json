@@ -1,0 +1,14 @@
+{
+    "Auth": true,
+    "Core": true,
+    "User": true,
+    "Contact": true,
+    "Lead": true,
+    "Deal": true,
+    "Activity": true,
+    "Task": true,
+    "Report": true,
+    "Api": true,
+    "Notification": true,
+    "Company": true
+}
