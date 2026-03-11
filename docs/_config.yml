@@ -4,7 +4,7 @@ description: >-
   and Tailwind CSS. Free and open source under the MIT License.
 
 baseurl: "/geniousCRM"
-url: "https://sharifur.github.io"
+url: "https://xgeniousllc.github.io"
 
 remote_theme: just-the-docs/just-the-docs
 
@@ -16,7 +16,7 @@ heading_anchors: true
 
 aux_links:
   "GitHub":
-    - "https://github.com/Sharifur/geniousCRM"
+    - "https://github.com/XgeniousLLC/geniousCRM"
 
 footer_content: >-
   Built by <a href="https://xgenious.com">Xgenious</a> &mdash;
