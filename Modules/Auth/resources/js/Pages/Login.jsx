@@ -5,11 +5,27 @@
  * Used by all roles (admin, manager, sales_user) — role-based redirect
  * happens server-side in LoginController after successful authentication.
  *
+ * On xgenious.com demo environments a "Demo credentials" panel is shown
+ * below the Sign in button so visitors can log in with one click.
+ *
  * Module : Auth
  * Author : Xgenious (https://xgenious.com)
  */
 
 import { useForm, Head } from '@inertiajs/react';
+
+const DEMO_ACCOUNTS = [
+    { role: 'Admin',    email: 'admin@minicrm.test',   password: 'password' },
+    { role: 'Manager',  email: 'manager@minicrm.test', password: 'password' },
+    { role: 'Sales',    email: 'mike@minicrm.test',    password: 'password' },
+    { role: 'Sales',    email: 'emma@minicrm.test',    password: 'password' },
+];
+
+/** Returns true only when the page is served from an xgenious.com host. */
+function isXgeniousDomain() {
+    return typeof window !== 'undefined' &&
+        window.location.hostname.endsWith('xgenious.com');
+}
 
 export default function Login() {
     const { data, setData, post, processing, errors } = useForm({
@@ -103,6 +119,38 @@ export default function Login() {
                                 {processing ? 'Signing in…' : 'Sign in'}
                             </button>
                         </form>
+
+                        {/* Demo credentials — shown only on xgenious.com */}
+                        {isXgeniousDomain() && (
+                            <div className="mt-5 pt-5 border-t border-border">
+                                <p className="text-xs font-medium text-muted-foreground mb-2">
+                                    Demo credentials — click to fill
+                                </p>
+                                <div className="space-y-1">
+                                    {DEMO_ACCOUNTS.map((account) => (
+                                        <button
+                                            key={account.email}
+                                            type="button"
+                                            onClick={() => {
+                                                setData('email', account.email);
+                                                setData('password', account.password);
+                                            }}
+                                            className="w-full flex items-center justify-between px-3 py-2 rounded-md text-xs bg-muted hover:bg-muted/80 transition text-left"
+                                        >
+                                            <span className="font-medium text-foreground w-16 shrink-0">
+                                                {account.role}
+                                            </span>
+                                            <span className="text-muted-foreground truncate">
+                                                {account.email}
+                                            </span>
+                                            <span className="text-muted-foreground ml-2 shrink-0">
+                                                password
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <p className="text-center text-xs text-muted-foreground mt-6">
