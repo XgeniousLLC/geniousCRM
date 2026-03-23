@@ -104,7 +104,7 @@ class DealTest extends TestCase
         $response = $this->actingAs($this->admin)->delete("/deals/{$deal->id}");
 
         $response->assertRedirect();
-        $this->assertDatabaseMissing('deals', ['id' => $deal->id]);
+        $this->assertSoftDeleted('deals', ['id' => $deal->id]);
     }
 
     /** GET /deals requires authentication. */

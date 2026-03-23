@@ -92,7 +92,7 @@ class ContactTest extends TestCase
         $response = $this->actingAs($this->admin)->delete("/contacts/{$contact->id}");
 
         $response->assertRedirect();
-        $this->assertDatabaseMissing('contacts', ['id' => $contact->id]);
+        $this->assertSoftDeleted('contacts', ['id' => $contact->id]);
     }
 
     /** GET /contacts requires authentication. */

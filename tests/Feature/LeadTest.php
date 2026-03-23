@@ -88,7 +88,7 @@ class LeadTest extends TestCase
         $response = $this->actingAs($this->admin)->delete("/leads/{$lead->id}");
 
         $response->assertRedirect();
-        $this->assertDatabaseMissing('leads', ['id' => $lead->id]);
+        $this->assertSoftDeleted('leads', ['id' => $lead->id]);
     }
 
     /** POST /leads/{id}/convert converts a lead to a contact and marks it converted. */
