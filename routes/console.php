@@ -21,3 +21,13 @@ Schedule::command('notify:task-due-reminders')
     ->dailyAt('08:00')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/scheduler.log'));
+
+/*
+| demo:reset — registered in CoreServiceProvider::registerCommandSchedules()
+| Runs every 4 hours to wipe and re-seed all CRM demo data.
+| The entry below is a human-readable reference only.
+|
+| php artisan demo:reset          (interactive — asks for confirmation)
+| php artisan demo:reset --force  (non-interactive, used by scheduler)
+| php artisan db:seed --class=DemoSeeder  (one-shot seed without clearing)
+*/

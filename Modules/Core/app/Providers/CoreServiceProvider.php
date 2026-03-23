@@ -16,8 +16,10 @@
 
 namespace Modules\Core\Providers;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Modules\Core\Console\Commands\ResetDemoData;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -57,18 +59,26 @@ class CoreServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([
+            ResetDemoData::class,
+        ]);
     }
 
     /**
      * Register command Schedules.
+     * Runs demo:reset every 4 hours to keep the live demo environment fresh.
      */
     protected function registerCommandSchedules(): void
     {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
+        $this->app->booted(function () {
+            /** @var Schedule $schedule */
+            $schedule = $this->app->make(Schedule::class);
+
+            $schedule->command('demo:reset --force')
+                ->everyFourHours()
+                ->withoutOverlapping()
+                ->appendOutputTo(storage_path('logs/demo-reset.log'));
+        });
     }
 
     /**
