@@ -1,151 +1,94 @@
----
-title: Deals
-parent: Features
-nav_order: 5
----
+# Deals & Pipeline
 
-# Deals
-{: .no_toc }
-
-## Table of contents
-{: .no_toc .text-delta }
-1. TOC
-{:toc}
-
----
-
-## Overview
-
-Deals represent sales opportunities. They move through a pipeline of stages from initial contact to won or lost. The pipeline can be viewed as a Kanban board or a sortable table.
-
-**Route prefix:** `/deals` (list/table), `/pipeline` (Kanban board)
-**Module:** `Deal`
-**Access:** All roles
-
----
-
-## Deal Fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| Title | text | Yes | Short name for the deal |
-| Value | decimal | No | Monetary value of the deal |
-| Stage | select | Yes | Current pipeline stage |
-| Win Probability | integer (0–100) | No | Auto-set from stage; overrideable |
-| Contact | select | No | Linked CRM contact |
-| Assigned To | select | No | Sales user responsible |
-| Expected Closing Date | date | No | Target close date |
-
----
+Deals are sales opportunities. Each deal moves through pipeline stages from first contact to closed — won or lost.
 
 ## Pipeline Stages
 
-| Stage | Default Probability | Colour |
-|-------|--------------------:|--------|
-| `new_deal` | 10 % | Blue |
-| `proposal_sent` | 30 % | Yellow |
-| `negotiation` | 60 % | Orange |
-| `won` | 100 % | Green |
-| `lost` | 0 % | Red |
+| Stage | Default Probability |
+|-------|-------------------|
+| **New Deal** | 10% |
+| **Proposal Sent** | 30% |
+| **Negotiation** | 60% |
+| **Won** | 100% |
+| **Lost** | 0% |
 
-When you change a deal's stage, the win probability updates automatically to the stage default. You can then override it with the slider.
+## Views: List vs Kanban
 
----
+Toggle between two views using the buttons in the page header.
 
-## Kanban Board
+### List View
 
-**Route:** `GET /pipeline` (defaults to board view)
+A sortable table showing title, contact, value, stage badge, close date, and assigned user. Rows are highlighted:
 
-The board shows one column per stage. Each card displays:
-- Deal title
-- Monetary value
-- Win probability %
+- 🟡 **Amber** — close date is within 7 days
+- 🔴 **Red** — close date has passed and the deal is not Won/Lost
+
+### Kanban Board
+
+Columns represent each stage. Drag a deal card from one column to another to update its stage.
+
+Each card shows:
+- Deal title and value
 - Linked contact name
-- Assigned user avatar
-- Expected closing date (red if overdue)
-- **Overdue** badge if the closing date has passed and the deal is not won/lost
+- Win probability chip
+- **Overdue** badge if the close date has passed
 
-**Drag and drop** — cards can be dragged between columns. On drop, the stage is updated via `PATCH /deals/{id}/stage` and the activity feed is logged.
+## Creating a Deal
 
----
+Click **New Deal**:
 
-## List View
+| Field | Required | Notes |
+|-------|----------|-------|
+| Title | Yes | Short description of the opportunity |
+| Value | No | Total deal value in your currency |
+| Stage | Yes | Defaults to New Deal |
+| Contact | No | Link to a CRM contact |
+| Assigned To | No | Sales user who owns this deal |
+| Expected Close Date | No | Date picker |
+| Win Probability | No | 0–100% slider (auto-filled by stage) |
 
-**Route:** `GET /pipeline?view=list` or `GET /deals`
+## Editing a Deal
 
-A sortable table with columns: Title, Value, Stage, Win %, Contact, Assigned To, Closing Date, Actions.
+Click the deal title or the edit icon. All fields can be updated including the stage.
 
-Row highlighting:
-- **Amber** — closing date within the next 7 days (not yet overdue)
-- **Red** — closing date has passed and deal is still open
+## Moving a Deal Stage
 
----
+**Via Kanban:** Drag the card to the target column.
+
+**Via List/Edit:** Open the deal and change the Stage field.
+
+Both methods log a `stage_changed` activity automatically.
 
 ## Win Probability
 
-Each deal has a `probability` field (0–100 %). It is:
-
-- **Auto-set** when the stage changes (using the stage defaults table above).
-- **Manually adjustable** via the probability slider in the create/edit modal.
-- **Used in reporting** — the Report module calculates weighted pipeline value:
+The probability slider (0–100%) is auto-populated based on the stage but can be overridden. This powers the **weighted pipeline value** in [Reports](/features/reports):
 
 ```
 Weighted Value = SUM(deal.value × deal.probability / 100)
 ```
 
----
+## Deal Products (Line Items)
+
+Each deal can have multiple line items. On the deal detail page, scroll to the **Products** section:
+
+| Field | Description |
+|-------|-------------|
+| Name | Product or service name |
+| Quantity | Number of units |
+| Unit Price | Price per unit |
+
+The deal value is automatically calculated from line items (or you can override it manually).
+
+## Deal Notes
+
+The deal detail page has a Notes section. Add timestamped notes visible to your whole team.
 
 ## Close Date Alerts
 
-| Alert | Trigger | Visual |
-|-------|---------|--------|
-| Upcoming | Closing date within 7 days, deal still open | Amber row / amber card border |
-| Overdue | Closing date in the past, deal not won/lost | Red row / red card border + "Overdue" badge |
+- **Dashboard** — "Closing This Week" card shows deals due within 7 days
+- **List** — rows highlighted amber (≤7 days) or red (overdue)
+- **Kanban** — "Overdue" badge on cards past the close date
 
-The Dashboard shows a **Closing This Week** card with a count of deals closing in the next 7 days.
+## Deleting a Deal
 
----
-
-## Deal Products (Line Items)
-
-Each deal can have multiple line-item products attached.
-
-**Route:** `POST /deals/{id}/products`
-
-| Field | Type | Required |
-|-------|------|----------|
-| Name | text | Yes |
-| Quantity | integer | Yes (min 1) |
-| Unit Price | decimal | Yes |
-
-- The deal's `value` is automatically recalculated as the sum of all line items after every add or delete.
-- The running total is shown at the bottom of the products panel on the deal detail page.
-
----
-
-## Tags
-
-Deals can be tagged using the same tag system as contacts. Tags are managed in the create/edit modal and can be used to filter the pipeline.
-
----
-
-## Trash / Restore
-
-Deleted deals appear in **Trash → Deals** tab. Restore returns the deal to the active pipeline.
-
----
-
-## Controller Reference
-
-**File:** `Modules/Deal/app/Http/Controllers/DealController.php`
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| `index` | `GET /deals` | List view with filters |
-| `board` | `GET /pipeline` | Kanban board grouped by stage |
-| `store` | `POST /deals` | Create deal |
-| `update` | `PUT /deals/{id}` | Update deal + assignment notification |
-| `updateStage` | `PATCH /deals/{id}/stage` | Move stage (drag-and-drop endpoint) |
-| `destroy` | `DELETE /deals/{id}` | Soft-delete |
-| `addProduct` | `POST /deals/{id}/products` | Add line item, recalc value |
-| `deleteProduct` | `DELETE /deals/{id}/products/{product}` | Remove line item, recalc value |
+Deleted deals go to [Deals Trash](/features/trash).

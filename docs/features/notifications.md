@@ -1,139 +1,59 @@
----
-title: Notifications
-parent: Features
-nav_order: 10
----
-
 # Notifications
-{: .no_toc }
 
-## Table of contents
-{: .no_toc .text-delta }
-1. TOC
-{:toc}
-
----
-
-## Overview
-
-Mini CRM has a two-channel notification system: in-app bell notifications visible in the top navigation bar, and email notifications dispatched via the queue.
-
-**Module:** `Notification`
-**Access:** All roles (receive notifications assigned to them)
-
----
+Mini CRM notifies you of important events in two ways: **in-app** (the bell icon) and **email** (via your mail server).
 
 ## In-App Notifications
 
-### Bell icon
+The bell icon (🔔) in the top header shows a badge with your unread notification count.
 
-A bell icon appears in the top-right header next to your avatar. An orange badge shows the count of unread notifications.
+Click the bell to open the notification dropdown. The last 10 notifications are shown, each with:
+- A message describing the event
+- A relative timestamp
+- A link to the relevant record
 
-### Notification dropdown
+### Marking as Read
 
-Clicking the bell opens a panel showing the 10 most recent notifications. Each notification shows:
+- Click a notification to mark it as read and navigate to the linked record
+- Click **Mark all as read** to clear all unread notifications at once
 
-- A blue dot indicator if unread
-- The message text
-- Relative timestamp (e.g. "2 hours ago")
-
-Clicking a notification:
-1. Marks it as read (removes the blue dot and decrements the badge count).
-2. Navigates to the relevant entity page (e.g. the deal or task that triggered the notification).
-
-### Mark all as read
-
-A "Mark all read" link at the top of the dropdown marks all notifications as read in one click.
-
----
-
-## Notification Triggers
+### What Triggers an In-App Notification
 
 | Event | Who is notified |
-|-------|-----------------|
-| Lead assigned to user | The newly assigned user |
-| Lead reassigned to different user | The new assignee |
-| Task assigned to user | The newly assigned user |
-| Task reassigned to different user | The new assignee |
-| Deal assigned to user | The newly assigned user |
-| Deal reassigned to different user | The new assignee |
-
-The previous assignee is not notified when a record is taken away from them.
-
----
+|-------|----------------|
+| Lead assigned to you | The assigned user |
+| Deal assigned to you | The assigned user |
+| Task assigned to you | The assigned user |
 
 ## Email Notifications
 
-Email notifications are sent via the Laravel queue (database or Redis driver).
+Email notifications are sent via the queue. Make sure `QUEUE_CONNECTION` and `MAIL_*` variables are configured (see [Configuration](/guide/configuration)).
 
-### Requirements
+### Lead Assigned Email
 
-In `.env`:
+When a lead is assigned to a user, they receive an email with:
+- Lead name and contact details
+- A link to open the lead in Mini CRM
 
-```env
-QUEUE_CONNECTION=database
-MAIL_MAILER=smtp
-MAIL_HOST=your-smtp-host
-MAIL_PORT=587
-MAIL_USERNAME=your-username
-MAIL_PASSWORD=your-password
-MAIL_FROM_ADDRESS=crm@yourdomain.com
-MAIL_FROM_NAME="Mini CRM"
-```
+### Deal Assigned Email
 
-Start the queue worker:
+When a deal is assigned to a user, they receive an email with deal title, value, and a direct link.
 
-```bash
-php artisan queue:work
-```
+### Task Assigned Email
 
-### Email types
+When a task is assigned to a user, they receive an email with task title, due date, and a link.
 
-| Notification Class | Trigger | Subject |
-|-------------------|---------|---------|
-| `LeadAssigned` | Lead assigned/reassigned | "New lead assigned to you" |
-| `TaskAssigned` | Task assigned/reassigned | "New task assigned to you" |
-| `DealAssigned` | Deal assigned/reassigned | "New deal assigned to you" |
-| `DealStageMail` | Deal moves to Won or Lost | "Deal status update" |
-| `TaskDueReminderMail` | Daily digest of tasks due today | "Tasks due today" |
+### Daily Task Reminder
 
-### Task Due Reminder Schedule
+Every day at **08:00** the scheduler sends each user a digest email listing all their tasks due today (status ≠ Done).
 
-A daily command `SendTaskDueReminders` runs via the Laravel scheduler at **08:00 UTC**. It finds all `pending` or `in_progress` tasks with `due_date = today` and emails each assignee.
+## Queue Worker Required
 
-To run the scheduler:
+Email notifications are sent via the Laravel queue. Make sure the queue worker is running:
 
 ```bash
-php artisan schedule:work
+php artisan queue:work --sleep=3 --tries=3
 ```
 
-Or in production use the Supervisor scheduler process — see [Docker Deployment](../deployment/docker).
+Or use Supervisor (a `supervisor.conf` is included in the repo root).
 
----
-
-## Database Schema
-
-Notifications use Laravel's built-in notification system with the `database` channel:
-
-```
-notifications
-├── id (UUID)
-├── type (fully-qualified notification class name)
-├── notifiable_type
-├── notifiable_id
-├── data (JSON: { message, url })
-├── read_at (nullable)
-└── created_at
-```
-
----
-
-## Notification API Endpoints
-
-These JSON endpoints are used by the bell component in the header:
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| `GET` | `/notifications` | Returns `{ unread_count, recent: [...] }` |
-| `PATCH` | `/notifications/{id}/read` | Mark one notification as read |
-| `PATCH` | `/notifications/read-all` | Mark all notifications as read |
+If emails are not arriving, check `storage/logs/laravel.log` for queue errors.

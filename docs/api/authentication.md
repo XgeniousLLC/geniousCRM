@@ -1,113 +1,81 @@
----
-title: Authentication
-parent: API Reference
-nav_order: 1
----
-
 # API Authentication
-{: .no_toc }
 
-## Table of contents
-{: .no_toc .text-delta }
-1. TOC
-{:toc}
-
----
+Mini CRM uses Laravel Sanctum for API token authentication.
 
 ## Register
 
 Create a new user account and receive an API token.
 
-```
+```http
 POST /api/v1/register
-```
+Content-Type: application/json
 
-### Request body
-
-```json
 {
-  "name": "Alice Smith",
-  "email": "alice@example.com",
+  "name": "Jane Doe",
+  "email": "jane@example.com",
   "password": "secret123",
   "password_confirmation": "secret123"
 }
 ```
 
-### Response `201 Created`
+**Response `201`:**
 
 ```json
 {
-  "data": {
-    "user": {
-      "id": 1,
-      "name": "Alice Smith",
-      "email": "alice@example.com"
-    },
-    "token": "1|abc123xyz..."
+  "token": "1|abc123...",
+  "user": {
+    "id": 1,
+    "name": "Jane Doe",
+    "email": "jane@example.com"
   }
 }
 ```
 
----
-
 ## Login
 
-Authenticate with email and password to receive an API token.
+Exchange credentials for an API token.
 
-```
+```http
 POST /api/v1/login
-```
+Content-Type: application/json
 
-### Request body
-
-```json
 {
-  "email": "alice@example.com",
+  "email": "jane@example.com",
   "password": "secret123"
 }
 ```
 
-### Response `200 OK`
+**Response `200`:**
 
 ```json
 {
-  "data": {
-    "user": {
-      "id": 1,
-      "name": "Alice Smith",
-      "email": "alice@example.com",
-      "role": "admin"
-    },
-    "token": "2|def456uvw..."
+  "token": "2|xyz456...",
+  "user": {
+    "id": 1,
+    "name": "Jane Doe",
+    "email": "jane@example.com"
   }
 }
 ```
 
-### Error `401 Unauthorized`
+**Response `422` — invalid credentials:**
 
 ```json
 {
-  "message": "Invalid credentials."
+  "message": "The provided credentials are incorrect."
 }
 ```
-
----
 
 ## Logout
 
 Revoke the current token.
 
-```
+```http
 POST /api/v1/logout
-```
-
-### Headers
-
-```
 Authorization: Bearer <token>
 ```
 
-### Response `200 OK`
+**Response `200`:**
 
 ```json
 {
@@ -115,15 +83,12 @@ Authorization: Bearer <token>
 }
 ```
 
----
+## Using the Token
 
-## Using Your Token
+Pass the token in every authenticated request:
 
-Include the token in the `Authorization` header of every subsequent request:
-
-```bash
-curl -H "Authorization: Bearer 2|def456uvw..." \
-     https://your-domain.com/api/v1/contacts
+```http
+GET /api/v1/contacts
+Authorization: Bearer 2|xyz456...
+Accept: application/json
 ```
-
-Tokens do not expire automatically. Call `POST /api/v1/logout` to revoke them.

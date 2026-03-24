@@ -1,120 +1,51 @@
----
-title: Trash & Restore
-parent: Features
-nav_order: 12
----
-
 # Trash & Restore
-{: .no_toc }
 
-## Table of contents
-{: .no_toc .text-delta }
-1. TOC
-{:toc}
+Contacts, leads, and deals are **soft-deleted** — they are not permanently removed when you click Delete. Instead, they move to the Trash where they can be reviewed, restored, or permanently purged.
 
----
+## Accessing the Trash
 
-## Overview
+Go to the Trash links in the sidebar (Admin only):
 
-Contacts, Leads, and Deals use Laravel's soft-delete mechanism. When you delete a record it moves to Trash rather than being permanently removed. You can restore it or permanently delete it from the Trash page.
+- **Contacts → Trash**
+- **Leads → Trash**
+- **Deals → Trash**
 
-**Route:** `GET /trash`
-**Access:** Admin only
-
----
-
-## Accessing Trash
-
-Click **Trash** in the sidebar (admin only). The Trash page has three tabs:
-
-| Tab | Contents |
-|-----|----------|
-| **Contacts** | Soft-deleted contacts with count badge |
-| **Leads** | Soft-deleted leads with count badge |
-| **Deals** | Soft-deleted deals with count badge |
-
-Switch between tabs to view each entity type.
-
----
-
-## Soft Delete
-
-When you click **Delete** on any Contact, Lead, or Deal:
-
-- The record is **not** removed from the database.
-- A `deleted_at` timestamp is set on the row.
-- The record disappears from all regular list pages and search results.
-- Related data (notes, tasks, activities) is preserved.
-
----
+Each Trash page shows only deleted records for that module.
 
 ## Restoring a Record
 
-In the Trash page, click **Restore** on any row.
+1. Open the Trash for the relevant module
+2. Find the record you want to recover
+3. Click **Restore**
 
-- The `deleted_at` column is set back to `null`.
-- The record reappears in its normal list page immediately.
-- All related data (notes, tasks, activities) is intact.
-
-| Restore Route | Description |
-|---------------|-------------|
-| `PATCH /contacts/{id}/restore` | Restore a soft-deleted contact |
-| `PATCH /leads/{id}/restore` | Restore a soft-deleted lead |
-| `PATCH /deals/{id}/restore` | Restore a soft-deleted deal |
-
----
+The record is immediately moved back to the active list and all its linked data (notes, tasks, tags) is restored.
 
 ## Permanently Deleting a Record
 
-Click **Delete Permanently** on any row in the Trash page. A confirmation prompt appears before the action executes.
+1. Open the Trash
+2. Click **Delete Permanently** next to the record
+3. Confirm the dialog
 
-{: .warning }
-> Permanent deletion cannot be undone. The database row is removed.
+::: danger This cannot be undone
+Permanent deletion removes the record and all associated data (notes, tags) from the database completely.
+:::
 
-| Force-Delete Route | Description |
-|--------------------|-------------|
-| `DELETE /contacts/{id}/force` | Permanently delete a contact |
-| `DELETE /leads/{id}/force` | Permanently delete a lead |
-| `DELETE /deals/{id}/force` | Permanently delete a deal |
+## When Records Get Soft-Deleted
 
----
+| Action | What happens |
+|--------|-------------|
+| Delete a contact | `deleted_at` is set; contact is hidden from all lists |
+| Delete a lead | `deleted_at` is set; lead is hidden from all lists |
+| Delete a deal | `deleted_at` is set; deal is hidden from the pipeline |
 
-## What Is NOT Soft-Deleted
+Tasks linked to a soft-deleted record remain in the database but are excluded from the My Tasks view.
 
-| Entity | Deletion behaviour |
-|--------|--------------------|
-| **Companies** | Permanent — no soft delete |
-| **Tasks** | Soft-deleted (not shown in Trash UI — deleted silently) |
-| **Notes** | Hard deleted immediately |
-| **Activities** | Immutable — never deleted |
+## Automatic Cleanup
 
----
+Mini CRM does not automatically purge old trash records. Run this command periodically if you want to clean up:
 
-## Database Columns
-
-Each soft-deletable table has a `deleted_at` column:
-
+```bash
+# Force-delete all soft-deleted contacts older than 30 days
+php artisan tinker
+>>> \Modules\Contact\Models\Contact::onlyTrashed()->where('deleted_at', '<', now()->subDays(30))->forceDelete();
 ```
-contacts  → deleted_at (nullable timestamp)
-leads     → deleted_at (nullable timestamp)
-deals     → deleted_at (nullable timestamp)
-tasks     → deleted_at (nullable timestamp)
-```
-
-Laravel's `SoftDeletes` trait automatically filters out rows where `deleted_at IS NOT NULL` in all standard queries.
-
----
-
-## Controller Reference
-
-**File:** `Modules/Core/app/Http/Controllers/TrashController.php`
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| `index` | `GET /trash` | Unified trash page with all three entity types |
-
-Restore and force-delete actions are handled by their respective module controllers:
-
-- `Modules/Contact/app/Http/Controllers/ContactTrashController.php`
-- `Modules/Lead/app/Http/Controllers/LeadTrashController.php`
-- `Modules/Deal/app/Http/Controllers/DealTrashController.php`

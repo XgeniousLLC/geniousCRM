@@ -1,147 +1,72 @@
----
-title: Leads
-parent: Features
-nav_order: 4
----
-
 # Leads
-{: .no_toc }
 
-## Table of contents
-{: .no_toc .text-delta }
-1. TOC
-{:toc}
-
----
-
-## Overview
-
-Leads track prospective customers before they become contacts. Each lead moves through a qualification pipeline and can be converted into a contact when qualified.
-
-**Route prefix:** `/leads`
-**Module:** `Lead`
-**Access:** All roles
-
----
-
-## Lead Fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| Name | text | Yes | Full name of the prospect |
-| Email | email | No | |
-| Phone | text | No | |
-| Source | select | No | Where the lead came from |
-| Status | select | Yes | Current pipeline stage |
-| Assigned To | select | No | Sales user responsible for this lead |
-| Follow-up Date | date | No | Reminder date for next contact |
-| Notes | textarea | No | Initial notes on the lead |
-
----
-
-## Lead Sources
-
-Sources are a predefined enum — no free text is accepted:
-
-| Value | Label |
-|-------|-------|
-| `Website` | Website |
-| `Referral` | Referral |
-| `LinkedIn` | LinkedIn |
-| `Cold Outreach` | Cold Outreach |
-| `Event` | Event |
-| `Advertisement` | Advertisement |
-| `Other` | Other |
-
----
+Leads represent prospective customers who have shown interest but haven't yet become contacts. Every lead moves through a status pipeline and can be converted to a contact with one click.
 
 ## Lead Statuses
 
-| Status | Colour | Meaning |
-|--------|--------|---------|
-| `new` | Blue | Freshly created, not yet contacted |
-| `contacted` | Yellow | Initial contact made |
-| `qualified` | Green | Confirmed as a valid prospect |
-| `lost` | Red | No longer pursuing |
-| `converted` | Purple | Converted to a contact |
+| Status | Meaning |
+|--------|---------|
+| **New** | Just entered the pipeline |
+| **Contacted** | You've reached out at least once |
+| **Qualified** | Budget and intent confirmed |
+| **Lost** | No longer interested or went elsewhere |
+| **Converted** | Turned into a Contact |
 
----
+## The Leads List
+
+Go to **Leads** in the sidebar. The table shows name, email, phone, source, assigned user, status badge, follow-up date, and action buttons.
+
+### Filtering and Searching
+
+- **Search** — filter by name or email
+- **Status filter** — click a status tab to show only leads in that state
+- **Overdue badge** — a red/amber badge appears on leads whose follow-up date has passed
+
+## Creating a Lead
+
+Click **New Lead** (top right):
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| Name | Yes | Person or company name |
+| Email | No | |
+| Phone | No | |
+| Source | No | Website, Referral, LinkedIn, Cold Outreach, Event, Advertisement, Other |
+| Assigned To | No | Sales user who owns this lead |
+| Status | Yes | Defaults to **New** |
+| Notes | No | Internal notes on the lead |
+| Follow-up Date | No | Date picker — shows overdue badge if past |
+
+## Editing a Lead
+
+Click **Edit** on any row. Change status, reassign, or update the follow-up date.
 
 ## Follow-up Dates
 
-Each lead can have a `follow_up_date`. The system highlights overdue and upcoming follow-ups:
+Setting a follow-up date puts the lead on your radar:
 
-| Highlight | Condition |
-|-----------|-----------|
-| Red badge | Follow-up date is in the past |
-| Amber badge | Follow-up date is today |
+- **Today** — the Dashboard "Follow-ups Due" card counts it
+- **Overdue** — the lead row shows a red badge in the list
+- **Upcoming** — amber badge 1–2 days before the date
 
-The Dashboard **Follow-ups Due** stat card counts all leads where `follow_up_date <= today`.
+Update the follow-up date each time you take action on the lead.
 
----
+## Lead Notes
 
-## Listing Leads
-
-**Route:** `GET /leads`
-
-Filtering options:
-
-| Filter | Description |
-|--------|-------------|
-| Search | Matches name and email |
-| Status | Dropdown — filters to a single status |
-| Tag | Filters leads that have the selected tag |
-| Sort | Name, status, follow-up date, or created date |
-
----
+Open a lead's detail page. The Notes panel works the same as contact notes — add timestamped notes visible to all team members.
 
 ## Converting a Lead to a Contact
 
-Click **Convert** in the row actions or lead detail page.
+When a lead is ready to become a Contact:
 
-What happens:
-1. The lead's name is split into `first_name` and `last_name`.
-2. A new Contact is created with the lead's email, phone, and source.
-3. The lead's status is set to `converted`.
-4. An activity entry is logged: `"Lead converted to contact"`.
+1. Open the lead detail page or click the **Convert** button in the list
+2. Click **Convert to Contact**
+3. Mini CRM splits the name into first/last, creates a new Contact with the lead's email and phone, and sets the lead status to **Converted**
 
-The original lead record is preserved (soft conversion — no deletion).
+::: tip
+You cannot convert a lead that is already converted or marked as Lost.
+:::
 
----
+## Deleting a Lead
 
-## Notes
-
-Each lead has a notes drawer. Notes are timestamped, attributed to their author, and displayed newest-first.
-
----
-
-## Duplicate Detection
-
-On creation, the system checks for existing leads (and contacts) with the same email or phone. A warning modal shows matches; you can proceed or cancel.
-
----
-
-## CSV Import
-
-Bulk-create leads from a `.csv` file. See [CSV Import](csv-import) for the full guide.
-
----
-
-## Trash / Restore
-
-Deleted leads appear in **Trash → Leads** tab. Restore returns the lead to the active list; permanent delete is irreversible.
-
----
-
-## Controller Reference
-
-**File:** `Modules/Lead/app/Http/Controllers/LeadController.php`
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| `index` | `GET /leads` | Paginated list with filters |
-| `store` | `POST /leads` | Create lead (with duplicate check) |
-| `update` | `PUT /leads/{id}` | Update lead + assignment notification |
-| `destroy` | `DELETE /leads/{id}` | Soft-delete |
-| `convert` | `POST /leads/{id}/convert` | Convert to contact |
-| `export` | `GET /leads/export` | Download leads as CSV |
+Deleted leads go to [Leads Trash](/features/trash). They can be restored at any time.

@@ -1,130 +1,58 @@
----
-title: Leads API
-parent: API Reference
-nav_order: 3
----
-
 # Leads API
-{: .no_toc }
-
-## Table of contents
-{: .no_toc .text-delta }
-1. TOC
-{:toc}
-
----
 
 ## List Leads
 
-```
+```http
 GET /api/v1/leads
+Authorization: Bearer <token>
 ```
 
-### Query parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `search` | string | Filter by name or email |
-| `status` | string | Filter by status (`new`, `contacted`, `qualified`, `lost`, `converted`) |
-| `page` | integer | Page number |
-
-### Response `200 OK`
-
-```json
-{
-  "data": [
-    {
-      "id": 5,
-      "name": "Bob Jones",
-      "email": "bob@example.com",
-      "phone": "+1 555 0100",
-      "source": "Website",
-      "status": "new",
-      "follow_up_date": "2024-02-15",
-      "assigned_user": { "id": 2, "name": "Alice Smith" },
-      "created_at": "2024-01-10T08:00:00Z"
-    }
-  ],
-  "meta": { "total": 23, "current_page": 1, ... }
-}
-```
-
----
+Query parameters: `search`, `status`, `per_page`, `page`.
 
 ## Get Lead
 
-```
+```http
 GET /api/v1/leads/{id}
+Authorization: Bearer <token>
 ```
-
-Returns a single lead resource with the same fields as the list response.
-
----
 
 ## Create Lead
 
-```
+```http
 POST /api/v1/leads
-```
+Authorization: Bearer <token>
+Content-Type: application/json
 
-### Request body
-
-```json
 {
-  "name": "Carol White",
-  "email": "carol@example.com",
-  "phone": "+44 7700 900002",
-  "source": "Referral",
+  "name": "Prospect Person",
+  "email": "prospect@example.com",
+  "phone": "555-9999",
+  "source": "Website",
   "status": "new",
-  "assigned_user_id": 2,
-  "follow_up_date": "2024-03-01"
+  "assigned_user_id": 2
 }
 ```
 
-| Field | Required | Valid values |
-|-------|----------|-------------|
-| `name` | Yes | |
-| `email` | No | Unique if provided |
-| `phone` | No | |
-| `source` | No | `Website`, `Referral`, `LinkedIn`, `Cold Outreach`, `Event`, `Advertisement`, `Other` |
-| `status` | No | `new`, `contacted`, `qualified`, `lost`, `converted` (default: `new`) |
-| `assigned_user_id` | No | Must be a valid user ID |
-| `follow_up_date` | No | ISO 8601 date string |
+Valid `source` values: `Website`, `Referral`, `LinkedIn`, `Cold Outreach`, `Event`, `Advertisement`, `Other`
 
-### Response `201 Created`
-
-Returns the created lead resource.
-
----
+Valid `status` values: `new`, `contacted`, `qualified`, `lost`, `converted`
 
 ## Update Lead
 
-```
+```http
 PUT /api/v1/leads/{id}
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "status": "qualified",
+  "follow_up_date": "2025-04-15"
+}
 ```
-
-### Request body
-
-Same fields as Create. Only include fields to update.
-
-### Response `200 OK`
-
-Returns the updated lead resource.
-
----
 
 ## Delete Lead
 
-```
+```http
 DELETE /api/v1/leads/{id}
-```
-
-Soft-deletes the lead.
-
-### Response `200 OK`
-
-```json
-{
-  "message": "Lead deleted successfully."
-}
+Authorization: Bearer <token>
 ```
