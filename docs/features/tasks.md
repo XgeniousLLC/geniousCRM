@@ -1,124 +1,56 @@
----
-title: Tasks & Notes
-parent: Features
-nav_order: 6
----
+# Tasks
 
-# Tasks & Notes
-{: .no_toc }
-
-## Table of contents
-{: .no_toc .text-delta }
-1. TOC
-{:toc}
-
----
-
-## Overview
-
-Tasks are polymorphic — they can be attached to any CRM entity (Contact, Lead, Deal, or Company). Notes are inline text entries stored per-entity and separate from tasks.
-
-**Route prefix:** `/tasks`
-**Module:** `Task`
-**Access:** All roles
-
----
-
-## Task Fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| Title | text | Yes | Short description of the task |
-| Description | textarea | No | Detailed instructions or context |
-| Due Date | date | No | When the task should be completed |
-| Status | select | Yes | Current state of the task |
-| Assigned To | select | No | User responsible for completing the task |
-
----
+Tasks are to-do items that can be attached to any CRM record — a contact, a lead, or a deal — or left as standalone reminders.
 
 ## Task Statuses
 
-| Status | Meaning |
-|--------|---------|
-| `pending` | Not yet started |
-| `in_progress` | Work has begun |
-| `done` | Completed |
+| Status | Description |
+|--------|-------------|
+| **Pending** | Not yet started (amber) |
+| **In Progress** | Being worked on (blue) |
+| **Done** | Completed (green) |
 
----
+## My Tasks View
 
-## My Tasks
+Go to **Tasks → My Tasks** in the sidebar. This shows all tasks assigned to you, sorted by due date. Overdue tasks (due date in the past, not done) appear at the top in red.
 
-**Route:** `GET /tasks`
+## Tasks on Entity Pages
 
-The "My Tasks" view shows all tasks assigned to the currently logged-in user. Tasks are sorted by:
+Tasks linked to a specific contact, lead, or deal appear on that entity's detail page in a **Tasks panel**. You can create new tasks directly from there without leaving the page.
 
-1. Status priority: `in_progress` first, `pending` second, `done` last.
-2. Due date ascending within each status group.
+## Creating a Task
 
-Filters available:
-- **Status** — filter by pending, in_progress, or done.
+Click **New Task** from any Tasks panel or from **My Tasks → New Task**:
 
----
+| Field | Required | Notes |
+|-------|----------|-------|
+| Title | Yes | Short task description |
+| Description | No | More detail |
+| Due Date | No | Date picker |
+| Assigned To | No | Defaults to you |
+| Status | Yes | Defaults to Pending |
+| Linked to | No | Contact, Lead, or Deal (auto-filled when created from entity page) |
 
-## Task Panels on Entity Pages
+## Updating a Task
 
-Tasks appear as embedded panels on the detail pages of:
+Click the task title or the edit icon. You can change the status, reassign, or update the due date.
 
-- Contact detail (`/contacts/{id}`)
-- Lead detail (`/leads/{id}`)
-- Deal detail (`/deals/{id}`)
-- Company detail (`/companies/{id}`)
+To cycle the status quickly, click the **status badge** — it moves: Pending → In Progress → Done → Pending.
 
-Each panel shows the tasks attached to that specific record. You can add new tasks directly from the panel without navigating away.
+## Completing a Task
 
-### Adding a task from a panel
+Click the task's status badge and select **Done**, or edit the task and set status to Done.
 
-1. Click **+ Add Task** within the task panel.
-2. Fill in the title, description, due date, status, and assignee.
-3. The task is created and appears immediately in the panel.
+## Task Reminders
 
-### Changing task status
+The scheduler sends a **daily email digest at 08:00** to each user listing their tasks due today. Make sure your mail configuration is set up in [Configuration](/guide/configuration).
 
-Click the status badge on any task card to cycle through `pending → in_progress → done`. The change is saved immediately via a `PATCH` request.
+## Deleting a Task
 
----
+Click the delete icon on any task. Deleted tasks are soft-deleted and can be restored from the database if needed (no UI trash view for tasks — contact your admin).
 
-## Notes
+## Tips
 
-Notes are inline text entries scoped to a single entity. They are simpler than tasks — no due date, no status, just body text.
-
-### Note fields
-
-| Field | Description |
-|-------|-------------|
-| Body | Free-text content |
-
-### Adding a note
-
-Click **+ Add Note** in the Notes panel on any entity detail page. The note is saved and displayed immediately.
-
-### Deleting a note
-
-Click the delete icon on any note. Only the note's author or an admin can delete it.
-
----
-
-## Task Assignment Notifications
-
-When a task is assigned or reassigned to a user, they receive:
-
-- An **in-app notification** (bell icon in the top header).
-- An **email** (if mail is configured and the queue worker is running).
-
----
-
-## Controller Reference
-
-**File:** `Modules/Task/app/Http/Controllers/TaskController.php`
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| `index` | `GET /tasks` | My Tasks list with status filter |
-| `store` | `POST /tasks` | Create task attached to any entity |
-| `update` | `PATCH /tasks/{id}` | Update task fields or status |
-| `destroy` | `DELETE /tasks/{id}` | Delete task |
+- Create a task immediately when you take action on a lead or deal — it keeps your pipeline accountable
+- Use the **Due Date** field and check **My Tasks** each morning
+- Assign tasks to specific team members from the deal or lead page to delegate work

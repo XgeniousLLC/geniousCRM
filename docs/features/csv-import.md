@@ -1,121 +1,75 @@
----
-title: CSV Import
-parent: Features
-nav_order: 11
----
-
 # CSV Import
-{: .no_toc }
 
-## Table of contents
-{: .no_toc .text-delta }
-1. TOC
-{:toc}
+Import contacts and leads in bulk from any spreadsheet tool (Excel, Google Sheets, etc.).
 
----
+## Supported Imports
 
-## Overview
+- **Contacts** — via the Contacts list page
+- **Leads** — via the Leads list page
 
-Mini CRM supports bulk importing Contacts and Leads from CSV files. The import flow includes column mapping and a preview step before committing data.
+## Step-by-Step Guide
 
-**Modules:** `Contact`, `Lead`
-**Access:** Admin, Manager
+### Step 1 — Prepare your CSV
 
----
+Export your spreadsheet as a `.csv` file. Ensure:
+- The first row contains column headers
+- Each subsequent row is one record
+- Emails are valid format (invalid rows will be skipped)
 
-## Importing Contacts
+### Step 2 — Upload the File
 
-**Route:** `GET /contacts/import`
+1. Go to **Contacts** (or **Leads**) in the sidebar
+2. Click **Import CSV**
+3. Click **Choose File** and select your `.csv` file
+4. Click **Upload**
 
-### Step 1 — Upload
+### Step 3 — Map Columns
 
-Click **Import CSV** on the Contacts list page. You are taken to the import page where you upload your `.csv` file.
+Mini CRM shows a column mapping screen. For each column in your CSV, choose which CRM field it maps to.
 
-Required: at least a `first_name` (or `name`) column.
-
-### Step 2 — Column Mapping
-
-After upload, a mapping table shows your CSV headers on the left and a dropdown of CRM fields on the right.
-
-| CSV Header | Maps to CRM Field |
-|------------|-------------------|
-| First Name | `first_name` |
-| Last Name  | `last_name` |
-| Email      | `email` |
-| Phone      | `phone` |
-| Company    | `company` |
+| CSV Column | Maps to CRM Field |
+|-----------|------------------|
+| `Full Name` | First Name + Last Name (split on space) |
+| `Email Address` | Email |
+| `Mobile` | Phone |
+| `Organisation` | Company |
 
 Unmapped columns are ignored.
 
-### Step 3 — Preview
+### Step 4 — Preview
 
-A preview table shows the first 5 rows with your mapping applied. Review for obvious mistakes before submitting.
+A preview table shows the first 5 rows with your mapping applied. Check that names and emails look correct before continuing.
 
-### Step 4 — Import
+### Step 5 — Import
 
-Click **Import**. The system processes the file in chunks of 100 rows:
+Click **Import**. Mini CRM processes the file in chunks of 100 rows.
 
-- Rows with invalid or duplicate emails are **skipped**.
-- Rows missing required fields are **skipped**.
-- A summary flash message reports: `"X imported, Y skipped"`.
+After completion you'll see a summary:
 
----
+> **Imported: 47 records. Skipped: 3 rows (invalid email).**
 
-## Importing Leads
+Skipped rows are those with missing required fields or duplicate emails.
 
-**Route:** `GET /leads/import`
+## CSV Format Tips
 
-Identical flow to Contact import. The available mapping fields are:
+::: tip Preparing contacts CSV
+Recommended columns: `first_name`, `last_name`, `email`, `phone`, `company`
+:::
 
-| CSV Header | Maps to CRM Field |
-|------------|-------------------|
-| Name       | `name` |
-| Email      | `email` |
-| Phone      | `phone` |
-| Source     | `source` |
-| Status     | `status` |
+::: tip Preparing leads CSV
+Recommended columns: `name`, `email`, `phone`, `source`, `status`
 
-### Valid `source` values
+Valid sources: `Website`, `Referral`, `LinkedIn`, `Cold Outreach`, `Event`, `Advertisement`, `Other`
 
-`Website`, `Referral`, `LinkedIn`, `Cold Outreach`, `Event`, `Advertisement`, `Other`
+Valid statuses: `new`, `contacted`, `qualified`, `lost`
+:::
 
-### Valid `status` values
+## Limits
 
-`new`, `contacted`, `qualified`, `lost`, `converted`
+- Maximum file size: 10 MB
+- No row limit — large files are chunked automatically
+- Duplicate emails are detected and skipped for contacts
 
-Invalid values in these columns default to `Website` and `new` respectively.
+## After Importing
 
----
-
-## CSV Format Requirements
-
-- First row must be a header row.
-- File encoding must be UTF-8.
-- Delimiter must be a comma (`,`).
-- Maximum file size: limited by your server's `upload_max_filesize` PHP setting (default 8 MB).
-
----
-
-## Example CSV (Contacts)
-
-```csv
-first_name,last_name,email,phone,company
-Alice,Smith,alice@example.com,+44 7700 900001,Acme Ltd
-Bob,Jones,bob@example.com,,
-```
-
----
-
-## Controller Reference
-
-| Controller | File |
-|------------|------|
-| `ContactImportController` | `Modules/Contact/app/Http/Controllers/ContactImportController.php` |
-| `LeadImportController` | `Modules/Lead/app/Http/Controllers/LeadImportController.php` |
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| `showForm` | `GET /contacts/import` | Upload + mapping form |
-| `import` | `POST /contacts/import` | Process CSV and insert records |
-| `showForm` | `GET /leads/import` | Upload + mapping form |
-| `import` | `POST /leads/import` | Process CSV and insert records |
+Tags, notes, and company links cannot be imported via CSV — add them manually after import or use the API for bulk updates.

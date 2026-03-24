@@ -1,102 +1,36 @@
----
-title: Settings
-parent: Features
-nav_order: 14
----
+# General Settings
 
-# Settings
-{: .no_toc }
+Admins can customise the application appearance and metadata from the Settings page.
 
-## Table of contents
-{: .no_toc .text-delta }
-1. TOC
-{:toc}
+## Accessing Settings
 
----
-
-## Overview
-
-The General Settings page lets admins configure application-wide options such as the app name, logo, and meta tags. Settings are stored in a key/value table and shared globally via Inertia.
-
-**Route:** `GET /settings`
-**Module:** `Core`
-**Access:** Admin only
-
----
+Go to **Settings → General** in the sidebar (Admin only).
 
 ## Available Settings
 
-| Setting Key | Label | Description |
-|-------------|-------|-------------|
-| `app_name` | Application Name | Displayed in the browser tab and top header |
-| `app_description` | Meta Description | `<meta name="description">` tag in the HTML head |
-| `app_keywords` | Meta Keywords | `<meta name="keywords">` tag in the HTML head |
-| `app_logo` | Logo | Uploaded image shown in the sidebar header |
-| `app_favicon` | Favicon | `.ico` or `.png` shown in browser tab |
-
----
+| Setting | Description |
+|---------|-------------|
+| **Application Title** | Shown in the browser tab and on the login page |
+| **Meta Description** | `<meta name="description">` tag for SEO |
+| **Meta Keywords** | `<meta name="keywords">` tag for SEO |
+| **Logo** | Image uploaded to storage, shown in the sidebar header |
+| **Favicon** | `.ico` or `.png` file shown in browser tabs |
 
 ## Updating Settings
 
-1. Navigate to **Settings** in the sidebar.
-2. Update any field.
-3. Click **Save Settings**.
+1. Fill in or update the fields
+2. For logo and favicon: click the file input and select an image from your computer
+3. Click **Save Settings**
 
-File uploads (logo, favicon) are stored in `storage/app/public/`. Run `php artisan storage:link` once after installation to make them publicly accessible.
+Changes apply immediately to all users on the next page load.
 
----
+## Logo and Favicon
 
-## How Settings Are Applied
+- **Logo** — recommended size: 200 × 50px, PNG with transparent background
+- **Favicon** — standard `.ico` format, 32 × 32px or 64 × 64px
 
-Settings are loaded once per request in `AppServiceProvider` via `SettingService::all()` and shared with all Inertia pages:
+Uploaded files are stored in `storage/app/public` and served from `/storage/`. The `storage:link` command must have been run for this to work.
 
-```php
-Inertia::share([
-    'settings' => SettingService::all(),
-]);
-```
+## Settings Storage
 
-The root Blade layout (`resources/views/app.blade.php`) reads them for:
-
-```html
-<title>{{ $page['props']['settings']['app_name'] ?? 'Mini CRM' }}</title>
-<meta name="description" content="...">
-<meta name="keywords" content="...">
-<link rel="icon" href="...">
-```
-
----
-
-## SettingService
-
-**File:** `Modules/Core/app/Services/SettingService.php`
-
-| Method | Description |
-|--------|-------------|
-| `get(string $key, $default = null)` | Read a single setting value |
-| `set(string $key, string $value)` | Write a setting (upsert) |
-| `all(): array` | Return all settings as key→value array |
-
----
-
-## Database Schema
-
-```
-settings
-├── id
-├── key (unique string)
-├── value (nullable text)
-├── created_at
-└── updated_at
-```
-
----
-
-## Controller Reference
-
-**File:** `Modules/Core/app/Http/Controllers/SettingController.php`
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| `index` | `GET /settings` | Show settings form |
-| `update` | `POST /settings` | Save all settings (file upload + text fields) |
+Settings are stored in a `settings` table as key/value pairs. They are shared globally via Inertia's `share()` mechanism, so every page has access to them without an extra database query.

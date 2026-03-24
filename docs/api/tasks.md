@@ -1,139 +1,58 @@
----
-title: Tasks API
-parent: API Reference
-nav_order: 5
----
-
 # Tasks API
-{: .no_toc }
-
-## Table of contents
-{: .no_toc .text-delta }
-1. TOC
-{:toc}
-
----
 
 ## List Tasks
 
-```
+```http
 GET /api/v1/tasks
+Authorization: Bearer <token>
 ```
 
-Returns tasks assigned to the authenticated user.
-
-### Query parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `status` | string | Filter by `pending`, `in_progress`, or `done` |
-| `page` | integer | Page number |
-
-### Response `200 OK`
-
-```json
-{
-  "data": [
-    {
-      "id": 7,
-      "title": "Follow up with Alice",
-      "description": "Call to discuss renewal",
-      "due_date": "2024-02-20",
-      "status": "pending",
-      "assigned_user": { "id": 2, "name": "Bob Jones" },
-      "taskable_type": "Contact",
-      "taskable_id": 1,
-      "created_at": "2024-01-25T09:00:00Z"
-    }
-  ],
-  "meta": { ... }
-}
-```
-
----
+Query parameters: `status`, `per_page`, `page`.
 
 ## Get Task
 
-```
+```http
 GET /api/v1/tasks/{id}
+Authorization: Bearer <token>
 ```
-
-Returns a single task resource.
-
----
 
 ## Create Task
 
-```
+```http
 POST /api/v1/tasks
-```
+Authorization: Bearer <token>
+Content-Type: application/json
 
-### Request body
-
-```json
 {
-  "title": "Send proposal",
-  "description": "Attach pricing PDF",
-  "due_date": "2024-02-28",
-  "status": "pending",
+  "title": "Call the client",
+  "description": "Follow up on the proposal sent last week.",
+  "due_date": "2025-04-10",
   "assigned_user_id": 2,
-  "taskable_type": "Deal",
-  "taskable_id": 3
+  "status": "pending",
+  "taskable_type": "Modules\\Contact\\Models\\Contact",
+  "taskable_id": 1
 }
 ```
 
-| Field | Required | Notes |
-|-------|----------|-------|
-| `title` | Yes | |
-| `description` | No | |
-| `due_date` | No | ISO 8601 date |
-| `status` | No | `pending`, `in_progress`, `done` (default: `pending`) |
-| `assigned_user_id` | No | Triggers in-app + email notification |
-| `taskable_type` | No | `Contact`, `Lead`, `Deal`, or `Company` |
-| `taskable_id` | No | ID of the parent entity |
+Valid `status` values: `pending`, `in_progress`, `done`
 
-### Response `201 Created`
-
-Returns the created task resource.
-
----
+Leave `taskable_type` and `taskable_id` null for a standalone task.
 
 ## Update Task
 
-```
+```http
 PUT /api/v1/tasks/{id}
-```
+Authorization: Bearer <token>
+Content-Type: application/json
 
-Same fields as Create. Commonly used to update the `status` field.
-
-### Response `200 OK`
-
-Returns the updated task resource.
-
----
-
-## Delete Task
-
-```
-DELETE /api/v1/tasks/{id}
-```
-
-Soft-deletes the task.
-
-### Response `200 OK`
-
-```json
 {
-  "message": "Task deleted successfully."
+  "status": "done"
 }
 ```
 
----
+## Delete Task
 
-## Task Status Values
-
-| Value | Meaning |
-|-------|---------|
-| `pending` | Not yet started |
-| `in_progress` | Work has begun |
-| `done` | Completed |
+```http
+DELETE /api/v1/tasks/{id}
+Authorization: Bearer <token>
+```

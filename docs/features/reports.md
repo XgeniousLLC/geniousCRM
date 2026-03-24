@@ -1,58 +1,16 @@
----
-title: Reports
-parent: Features
-nav_order: 9
----
-
 # Reports
-{: .no_toc }
 
-## Table of contents
-{: .no_toc .text-delta }
-1. TOC
-{:toc}
+The Reports module gives you charts and metrics to understand your pipeline performance.
 
----
+## Accessing Reports
 
-## Overview
+Go to **Reports** in the sidebar. This page is visible to **Admin** and **Manager** roles.
 
-The Reports module gives admins and managers a visual overview of pipeline health, lead conversion, and sales performance. All charts update dynamically based on the selected date range and support CSV export.
+## Available Reports
 
-**Route:** `GET /reports`
-**Module:** `Report`
-**Access:** Admin, Manager
+### 1. Deals by Stage (Bar Chart)
 
----
-
-## Date Range Filter
-
-A date picker at the top of the reports page lets you filter all metrics to a custom range. The default view shows the last 30 days.
-
-| Input | Description |
-|-------|-------------|
-| From | Start date (inclusive) |
-| To | End date (inclusive) |
-
-Changing the range reloads all charts and numbers for that period.
-
----
-
-## Summary Stats
-
-Four top-level stat cards:
-
-| Stat | Calculation |
-|------|-------------|
-| **Total Contacts** | All contacts created in the date range |
-| **Total Leads** | All leads created in the date range |
-| **Converted Leads** | Leads with `status = converted` in the range |
-| **Total Deal Value** | Sum of all deal values in the range |
-
----
-
-## Deals by Stage (Bar Chart)
-
-A horizontal bar chart grouped by stage shows how many deals currently sit in each stage:
+A bar chart showing how many deals (and their total value) are in each pipeline stage:
 
 - New Deal
 - Proposal Sent
@@ -60,64 +18,40 @@ A horizontal bar chart grouped by stage shows how many deals currently sit in ea
 - Won
 - Lost
 
-This gives an at-a-glance view of pipeline health and where deals are stalling.
+Use this to spot bottlenecks — for example, too many deals stuck in "Proposal Sent".
 
----
+### 2. Lead Conversion Rate
 
-## Lead Conversion Rate
+Shows:
+- Total leads created in the selected period
+- How many were converted to contacts
+- Conversion rate as a percentage
 
-Displays the ratio of converted leads to total leads as a percentage:
+### 3. Sales Pipeline Value
 
-```
-Conversion Rate = (Converted Leads / Total Leads) × 100
-```
+A table grouped by stage showing:
 
-A secondary breakdown shows leads by source (Website, Referral, LinkedIn, etc.) so you can see which channels produce the most qualified prospects.
+| Stage | Deal Count | Total Value | Weighted Value |
+|-------|-----------|-------------|----------------|
+| New Deal | 3 | $12,000 | $1,200 (10%) |
+| Negotiation | 2 | $30,000 | $18,000 (60%) |
+| Won | 5 | $85,000 | $85,000 (100%) |
 
----
+**Weighted Value** = `value × probability / 100`. Useful for forecasting realistic revenue.
 
-## Sales Pipeline Report
+### 4. Leads by Source
 
-Lists all open deals (not won or lost) grouped by stage, with:
+A bar chart showing how many leads came from each source:
+Website, Referral, LinkedIn, Cold Outreach, Event, Advertisement, Other.
 
-- Deal count per stage
-- Total value per stage
-- **Weighted value** per stage (value × probability / 100)
-- Overall weighted pipeline total
+Use this to identify your best-performing acquisition channels.
 
-The weighted pipeline is particularly useful for revenue forecasting — it accounts for the fact that not all open deals will close.
+## Date Range Filter
 
----
+All reports respect the **date range** filter at the top of the page. Select a preset (This Month, Last Month, This Quarter, This Year) or enter a custom range.
 
-## Weighted Pipeline Formula
+## Exporting to CSV
 
-```
-Weighted Pipeline = SUM(deal.value × deal.probability / 100)
-```
+On the **Contacts** and **Leads** list pages, click **Export CSV** to download all records matching the current filter as a CSV file.
 
-Example: A deal worth $10,000 at 60 % probability contributes $6,000 to the weighted pipeline.
-
----
-
-## CSV Export
-
-Two export buttons are available:
-
-| Export | Contents |
-|--------|---------|
-| **Export Contacts** | All active contacts (id, name, email, phone, company, tags, created\_at) |
-| **Export Leads** | All active leads (id, name, email, status, source, follow\_up\_date, created\_at) |
-
-Files download immediately as `.csv` — no email or background job required.
-
----
-
-## Controller Reference
-
-**File:** `Modules/Report/app/Http/Controllers/ReportController.php`
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| `index` | `GET /reports` | Main report dashboard with all charts |
-| `exportContacts` | `GET /reports/export-contacts` | Download contacts CSV |
-| `exportLeads` | `GET /reports/export-leads` | Download leads CSV |
+The Reports page itself does not export charts — use the CSV export on the list pages for raw data.

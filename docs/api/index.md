@@ -1,88 +1,52 @@
----
-title: API Reference
-nav_order: 3
-has_children: true
----
+# REST API Overview
 
-# REST API Reference
-{: .no_toc }
+Mini CRM exposes a versioned REST API for all core resources. The API is protected by Laravel Sanctum tokens.
 
-## Table of contents
-{: .no_toc .text-delta }
-1. TOC
-{:toc}
+## Base URL
 
----
-
-## Overview
-
-Mini CRM exposes a versioned REST API secured with **Laravel Sanctum** token authentication. The API is designed for building integrations, mobile apps, or third-party automations.
-
-**Base URL:** `/api/v1`
-**Module:** `Api`
-**Authentication:** Bearer token (Sanctum)
-
----
+```
+https://your-domain.com/api/v1
+```
 
 ## Authentication
 
-All API endpoints except `POST /api/v1/login` and `POST /api/v1/register` require an `Authorization` header:
+All API endpoints (except login and register) require a Bearer token in the `Authorization` header:
 
-```
+```http
 Authorization: Bearer <your-token>
 ```
 
-Tokens are obtained via the login endpoint and remain valid until explicitly revoked.
+See [Authentication](/api/authentication) for how to obtain a token.
 
----
+## Rate Limiting
 
-## Rate Limits
-
-| Client type | Limit |
-|-------------|-------|
-| Unauthenticated (login, register) | 60 requests / minute |
+| Endpoint group | Limit |
+|---------------|-------|
+| Public (login, register) | 60 requests / minute |
 | Authenticated | 120 requests / minute |
 
-When a rate limit is exceeded the API returns `429 Too Many Requests`.
-
----
+Exceeding the limit returns `429 Too Many Requests`.
 
 ## Response Format
 
-All responses are JSON. Successful responses follow this envelope:
+All responses are JSON. Successful responses follow this structure:
 
 ```json
 {
-  "data": { ... },
-  "message": "Optional success message"
+  "data": { ... }
 }
 ```
 
-Paginated list responses use Laravel's pagination wrapper:
+Or for lists:
 
 ```json
 {
-  "data": [...],
-  "links": { "first": "...", "last": "...", "prev": null, "next": "..." },
-  "meta": { "current_page": 1, "last_page": 4, "per_page": 15, "total": 52 }
+  "data": [ ... ],
+  "meta": { "current_page": 1, "last_page": 3, "per_page": 15, "total": 42 }
 }
 ```
 
----
-
-## Error Responses
-
-| HTTP Status | Meaning |
-|-------------|---------|
-| `400` | Bad Request — validation failed |
-| `401` | Unauthenticated — token missing or invalid |
-| `403` | Forbidden — insufficient role |
-| `404` | Not Found |
-| `422` | Unprocessable Entity — validation errors (with field details) |
-| `429` | Too Many Requests |
-| `500` | Internal Server Error |
-
-Validation errors return a `422` with an `errors` key:
+Error responses:
 
 ```json
 {
@@ -93,14 +57,12 @@ Validation errors return a `422` with an `errors` key:
 }
 ```
 
----
-
 ## Available Endpoints
 
-| Section | Prefix |
-|---------|--------|
-| [Authentication](authentication) | `/api/v1` |
-| [Contacts](contacts) | `/api/v1/contacts` |
-| [Leads](leads) | `/api/v1/leads` |
-| [Deals](deals) | `/api/v1/deals` |
-| [Tasks](tasks) | `/api/v1/tasks` |
+| Resource | Endpoints |
+|----------|-----------|
+| Auth | [POST /login, POST /register, POST /logout](/api/authentication) |
+| Contacts | [CRUD](/api/contacts) |
+| Leads | [CRUD](/api/leads) |
+| Deals | [CRUD](/api/deals) |
+| Tasks | [CRUD](/api/tasks) |
