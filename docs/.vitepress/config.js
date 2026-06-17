@@ -34,6 +34,7 @@ export default defineConfig({
           { text: 'Introduction',      link: '/guide/introduction' },
           { text: 'Quick Start',       link: '/guide/quick-start' },
           { text: 'Installation',      link: '/guide/installation' },
+          { text: 'Platform Installation', link: '/guide/platform-installation' },
           { text: 'Docker Setup',      link: '/guide/docker' },
           { text: 'Configuration',     link: '/guide/configuration' },
           { text: 'First Login',       link: '/guide/first-login' },
